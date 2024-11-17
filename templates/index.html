@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 20px;
+      max-width: 600px;
+    }
+    .input-container {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #output {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      white-space: pre-wrap;
+    }
+    #loading {
+      display: none;
+      font-size: 16px;
+      color: #007BFF;
+    }
+    input:disabled, button:disabled {
+      background-color: #f0f0f0;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <h1>Text Generator</h1>
+  <div class="input-container">
+    <label for="length">Length:</label>
+    <input type="number" id="length" placeholder="Enter length (e.g., 300)">
+  </div>
+  <div class="input-container">
+    <label for="temperature">Temperature:</label>
+    <input type="number" id="temperature" step="0.1" placeholder="Enter temperature (e.g., 0.5)">
+  </div>
+  <button id="generateButton">Generate Text</button>
+  <div id="loading">Generating text... Please wait...</div>
+  <div id="output"></div>
+
+  <script>
+    document.getElementById('generateButton').addEventListener('click', async () => {
+      const length = document.getElementById('length').value || 300; // Default length: 300
+      const temperature = document.getElementById('temperature').value || 0.5; // Default temperature: 0.5
+
+      // Disable inputs and show loading message
+      document.getElementById('length').disabled = true;
+      document.getElementById('temperature').disabled = true;
+      document.getElementById('generateButton').disabled = true;
+      document.getElementById('loading').style.display = 'block';
+
+      // Send request to backend
+      const response = await fetch('http://127.0.0.1:5000/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ length: parseInt(length), temperature: parseFloat(temperature) }),
+      });
+
+      // Hide loading and display the generated text
+      if (response.ok) {
+        const data = await response.json();
+        document.getElementById('output').textContent = data.generated_text;
+      } else {
+        document.getElementById('output').textContent = 'Error: Unable to generate text.';
+      }
+
+      // Enable inputs after generation is complete
+      document.getElementById('length').disabled = false;
+      document.getElementById('temperature').disabled = false;
+      document.getElementById('generateButton').disabled = false;
+      document.getElementById('loading').style.display = 'none';
+    });
+  </script>
+</body>
+</html>
